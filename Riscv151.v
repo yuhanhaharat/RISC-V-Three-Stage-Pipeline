@@ -14,35 +14,42 @@ module Riscv151 #(
       wire [1:0] PC_sel;
       
       wire [31:0] instruction_IF;
-      wire [13:0] PC_IF;
+      wire [31:0] PC_IF;
       wire Reg_WE_IF;
       wire [3:0] ALU_sel_IF;
       wire [1:0] PC_sel_IF;
+      wire A_sel_IF;
       wire B_sel_IF;
+      wire CSR_sel_IF;
+      wire CSR_WE_IF;
       wire [1:0] DMEM_sel_IF;
       wire [2:0] LOAD_sel_IF;
       wire [1:0] WB_sel_IF;
-      wire [3:0] imem_wea_IF;
       
       wire [31:0] instruction_EXE;
-      wire [13:0] PC_EXE;
+      wire [31:0] PC_EXE;
       wire Reg_WE_EXE;
       wire [3:0] ALU_sel_EXE;
+      wire A_sel_EXE;
       wire B_sel_EXE;
+      wire CSR_sel_EXE;
+      wire CSR_WE_EXE;
       wire [1:0] DMEM_sel_EXE;
       wire [2:0] LOAD_sel_EXE;
       wire [1:0] WB_sel_EXE;
       wire [3:0] imem_wea_EXE;
+      wire [31:0] imem_dina_EXE;
+      wire [31:0] IMME_result_EXE;
       wire [31:0] ALU_result_EXE;
       wire [31:0] DMEM_data_EXE;
       
       wire [31:0] instruction_MWB;
-      wire [13:0] PC_MWB;
+      wire [31:0] PC_MWB;
       wire Reg_WE_MWB;
       wire [1:0] DMEM_sel_MWB;
       wire [2:0] LOAD_sel_MWB;
       wire [1:0] WB_sel_MWB;
-      wire [3:0] imem_wea_MWB;
+      wire [31:0] IMME_result_MWB;
       wire [31:0] ALU_result_MWB;
       wire [31:0] Reg_DataB_MWB;
       wire [31:0] WB_data_out_MWB;
@@ -50,11 +57,11 @@ module Riscv151 #(
       IFstage IFstage1(
               .clk(clk),
               .rst(rst),
-              .PC_rst(14'd0),
+              .PC_rst(32'd0),
               .PC_sel(PC_sel),
-              .imem_wea(imem_wea_MWB),
-              .imem_addra(ALU_result_MWB[13:0]),
-              .imem_dina(Reg_DataB_MWB),
+              .imem_wea(imem_wea_EXE),
+              .imem_addra(ALU_result_MWB[15:2]),
+              .imem_dina(imem_dina_EXE),
               .instruction(instruction_IF),
               .PC_reg_out(PC_IF));
 
@@ -64,27 +71,38 @@ module Riscv151 #(
               .Reg_WE(Reg_WE_IF),
               .ALU_sel(ALU_sel_IF),
               .PC_sel(PC_sel),
+              .A_sel(A_sel_IF),
               .B_sel(B_sel_IF),
+              .CSR_sel(CSR_sel_IF),
+              .CSR_WE(CSR_WE_IF),
               .DMEM_sel(DMEM_sel_IF),
               .LOAD_sel(LOAD_sel_IF),
-              .WB_sel(WB_sel_IF),
-              .imem_wea(imem_wea_IF));
+              .WB_sel(WB_sel_IF));
 
       EXstage EXstage1(
               .clk(clk),
+              .PC(PC_EXE),
               .instruction_EXE(instruction_EXE),
               .instruction_MWB(instruction_MWB),
               .DataDin(WB_data_out_MWB),
               .Reg_WE(Reg_WE_MWB),
               .ALU_sel(ALU_sel_EXE),
+              .A_sel(A_sel_EXE),
               .B_sel(B_sel_EXE),
+              .CSR_sel(CSR_sel_EXE),
+              .CSR_WE(CSR_WE_EXE),
               .ALU_result(ALU_result_EXE),
-              .DMEM_data_out(DMEM_data_EXE));
+              .IMME_out(IMME_result_EXE),
+              .DMEM_data_out(DMEM_data_EXE),
+              .mem_data(imem_dina_EXE),     //pass back to imem
+              .imem_wea(imem_wea_EXE));     //pass back to imem
               
       WBstage WBstage1(
               .clk(clk),
               .DMEM_data_in(DMEM_data_EXE),
+              .IMME_in(IMME_result_MWB),
               .ALU_in(ALU_result_MWB),
+              .PC(PC_MWB),
               .instruction(instruction_MWB),
               .DMEM_sel(DMEM_sel_MWB),
               .LOAD_sel(LOAD_sel_MWB),
@@ -95,16 +113,22 @@ module Riscv151 #(
               .clk(clk), 
               .rst(rst), 
               .instruction_in(instruction_IF), 
-              .PC_in(PC_IF), 
-              .B_sel_in(B_sel_IF), 
+              .PC_in(PC_IF),
+              .A_sel_in(A_sel_IF), 
+              .B_sel_in(B_sel_IF),
+              .CSR_sel_in(CSR_sel_IF), 
+              .CSR_WE_in(CSR_WE_IF),  
               .ALU_sel_in(ALU_sel_IF), 
               .Reg_WE_in(Reg_WE_IF), 
               .DMEM_sel_in(DMEM_sel_IF), 
               .LOAD_sel_in(LOAD_sel_IF), 
               .WB_sel_in(WB_sel_IF),
               .instruction_out(instruction_EXE), 
-              .PC_out(PC_EXE), 
-              .B_sel_out(B_sel_EXE), 
+              .PC_out(PC_EXE),
+              .A_sel_out(A_sel_EXE),  
+              .B_sel_out(B_sel_EXE),
+              .CSR_sel_out(CSR_sel_EXE), 
+              .CSR_WE_out(CSR_WE_EXE),  
               .ALU_sel_out(ALU_sel_EXE), 
               .Reg_WE_out(Reg_WE_EXE), 
               .DMEM_sel_out(DMEM_sel_EXE), 
@@ -114,26 +138,21 @@ module Riscv151 #(
       EXE2MWB EXE2MWB1(
               .clk(clk),
               .rst(rst),
-              .instruction_in(instruction_EXE), 
+              .instruction_in(instruction_EXE),
+              .IMME_result_in(IMME_result_EXE), 
               .ALU_result_in(ALU_result_EXE), 
               .PC_in(PC_EXE), 
               .Reg_WE_in(Reg_WE_EXE), 
               .DMEM_sel_in(DMEM_sel_EXE), 
               .LOAD_sel_in(LOAD_sel_EXE), 
               .WB_sel_in(WB_sel_EXE),
-              .instruction_out(instruction_MWB), 
+              .instruction_out(instruction_MWB),
+              .IMME_result_out(IMME_result_MWB),  
               .ALU_result_out(ALU_result_MWB), 
               .PC_out(PC_MWB), 
               .Reg_WE_out(Reg_WE_MWB), 
               .DMEM_sel_out(DMEM_sel_MWB), 
               .LOAD_sel_out(LOAD_sel_MWB), 
               .WB_sel_out(WB_sel_MWB));
-      
-      wire [31:0] instruction_MWB_q;
-      REGISTER_R #(.N(32)) INST_REG(
-                    .q(instruction_MWB_q),
-                    .d(instruction_MWB),
-                    .clk(clk),
-                    .rst(rst));
-  
+        
 endmodule

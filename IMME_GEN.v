@@ -32,6 +32,9 @@ module IMME_GEN(instruction,IMME_out);
             `OPC_JALR_5:begin
                 IMME_out = {{20{instruction[31]}},instruction[31:20]};
             end
+            `OPC_CSR_5:begin
+                IMME_out = {{27{1'b0}},instruction[19:15]};
+            end
             default:begin
                 IMME_out = 32'd0;
             end
