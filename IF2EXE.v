@@ -35,6 +35,8 @@ module IF2EXE(clk, rst, instruction_in, PC_in, A_sel_in, B_sel_in, CSR_sel_in, C
                     PC_out <= 32'd0;
                     A_sel_out <= 1'd0;
                     B_sel_out <= 1'd0;
+                    CSR_sel_out <= 1'd0;
+                    CSR_WE_out <= 1'd0;
                     ALU_sel_out <= 4'd0;
                     Reg_WE_out <= 1'd0;
                     DMEM_sel_out <= 2'd0;
@@ -46,6 +48,8 @@ module IF2EXE(clk, rst, instruction_in, PC_in, A_sel_in, B_sel_in, CSR_sel_in, C
                   PC_out <= PC_in;
                   A_sel_out <= A_sel_in;
                   B_sel_out <= B_sel_in;
+                  CSR_sel_out <= CSR_sel_in;
+                  CSR_WE_out <= CSR_WE_in;
                   ALU_sel_out <= ALU_sel_in;
                   Reg_WE_out <= Reg_WE_in;
                   DMEM_sel_out <= DMEM_sel_in;

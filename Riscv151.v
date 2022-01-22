@@ -14,6 +14,7 @@ module Riscv151 #(
       wire [1:0] PC_sel;
       
       wire [31:0] instruction_IF;
+      wire [31:0] instruction_raw_IF;
       wire [31:0] PC_IF;
       wire Reg_WE_IF;
       wire [3:0] ALU_sel_IF;
@@ -42,6 +43,7 @@ module Riscv151 #(
       wire [31:0] IMME_result_EXE;
       wire [31:0] ALU_result_EXE;
       wire [31:0] DMEM_data_EXE;
+      wire should_br;
       
       wire [31:0] instruction_MWB;
       wire [31:0] PC_MWB;
@@ -57,17 +59,21 @@ module Riscv151 #(
       IFstage IFstage1(
               .clk(clk),
               .rst(rst),
+              .should_br(should_br),
               .PC_rst(32'd0),
               .PC_sel(PC_sel),
               .imem_wea(imem_wea_EXE),
               .imem_addra(ALU_result_MWB[15:2]),
               .imem_dina(imem_dina_EXE),
+              .ALU_result(ALU_result_EXE),
               .instruction(instruction_IF),
+              .instruction_raw(instruction_raw_IF),
               .PC_reg_out(PC_IF));
 
       controlunit controlunit1(
               .rst(rst),
-              .instruction(instruction_IF),
+              .instruction(instruction_raw_IF),
+              .should_br(should_br),
               .Reg_WE(Reg_WE_IF),
               .ALU_sel(ALU_sel_IF),
               .PC_sel(PC_sel),
@@ -81,6 +87,7 @@ module Riscv151 #(
 
       EXstage EXstage1(
               .clk(clk),
+              .rst(rst),
               .PC(PC_EXE),
               .instruction_EXE(instruction_EXE),
               .instruction_MWB(instruction_MWB),
@@ -94,8 +101,10 @@ module Riscv151 #(
               .ALU_result(ALU_result_EXE),
               .IMME_out(IMME_result_EXE),
               .DMEM_data_out(DMEM_data_EXE),
+              .should_br(should_br),
               .mem_data(imem_dina_EXE),     //pass back to imem
-              .imem_wea(imem_wea_EXE));     //pass back to imem
+              .imem_wea(imem_wea_EXE),      //pass back to imem
+              .CSR_dout(csr));              //csr register
               
       WBstage WBstage1(
               .clk(clk),

@@ -1,6 +1,6 @@
-module EXstage(clk,PC,instruction_EXE,instruction_MWB,DataDin,Reg_WE,ALU_sel,A_sel,B_sel,CSR_sel,CSR_WE,ALU_result,IMME_out,DMEM_data_out,mem_data,imem_wea);
+module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,Reg_WE,ALU_sel,A_sel,B_sel,CSR_sel,CSR_WE,ALU_result,IMME_out,DMEM_data_out,should_br,mem_data,imem_wea,CSR_dout);
     //clk,rst signal
-    input clk;
+    input clk,rst;
     //instruction input
     input [31:0] PC;
     input [31:0] instruction_EXE;
@@ -17,17 +17,18 @@ module EXstage(clk,PC,instruction_EXE,instruction_MWB,DataDin,Reg_WE,ALU_sel,A_s
     output [31:0] ALU_result;
     output [31:0] IMME_out;           //Data out from IMMEout unit
     output [31:0] DMEM_data_out;    //output from dmem
+    output should_br;
     //outputs for imem
     output [31:0] mem_data;         //need output mem_data since instruction memory will need this
     output [3:0] imem_wea;          //need output imem_wea since instruction memory will need this
+    //CSR data
+    output [31:0] CSR_dout;
     
     wire [31:0] DataAout,DataBout;  //From Reg File
     wire [31:0] DataAin,DataBin;    //Data into ALU 
     //Reg File DataA and DataB
     wire [31:0] Reg_DataA;
     wire [31:0] Reg_DataB;
-    //CSR data
-    wire [31:0] CSR_dout;
     //DMEM part:bios,dmem,iomem
     wire [11:0] bios_addra;
     wire [31:0] bios_douta; //put this as output
@@ -74,6 +75,13 @@ module EXstage(clk,PC,instruction_EXE,instruction_MWB,DataDin,Reg_WE,ALU_sel,A_s
         .ALUsel(ALU_sel),
         .result(ALU_result));
         
+    BRANCH_UNIT BRANCH_UNIT1(
+        .rst(rst),
+        .DataA(DataAout),
+        .DataB(DataBout),
+        .instruction(instruction_EXE),
+        .should_br(should_br));
+
     mux_2input #(.LENGTH(32)) CSR_MUX(
             .in1(IMME_out),
             .in2(DataAout),
