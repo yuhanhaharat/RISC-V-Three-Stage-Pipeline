@@ -1,4 +1,5 @@
 module BIOS(clk,bios_addra,bios_addrb,bios_douta,bios_doutb);
+    parameter  MIF_HEX = "bios151v3.mif";
     localparam BIOS_AWIDTH = 12;
     localparam BIOS_DWIDTH = 32;
     
@@ -19,8 +20,8 @@ module BIOS(clk,bios_addra,bios_addrb,bios_douta,bios_doutb);
     // Write-byte-enable: select which of the four bytes to write
     SYNC_RAM_DP_WBE #(
       .AWIDTH(BIOS_AWIDTH),
-      .DWIDTH(BIOS_DWIDTH)
-    ) imem (
+      .DWIDTH(BIOS_DWIDTH),
+      .MIF_HEX(MIF_HEX)) imem (
       .q0(bios_douta),    // output
       .d0(bios_dina),     // input
       .addr0(bios_addra), // input

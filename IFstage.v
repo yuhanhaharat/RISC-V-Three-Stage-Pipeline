@@ -1,5 +1,6 @@
 module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb,bios_dout,ALU_result,instruction,instruction_raw,PC_reg_out);    
-    parameter RESET_PC       = 32'h0000_0000;
+    parameter RESET_PC = 32'h0000_0000;
+    parameter MIF_HEX = "bios151v3.mif";
     
     //clk,rst signal
     input clk,rst;
@@ -37,7 +38,7 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
       .sel(PC_sel),
       .out(PC));
       
-    BIOS BIOS1 (
+    BIOS #(.MIF_HEX(MIF_HEX)) BIOS1 (
         .clk(clk),
         .bios_addra(PC[13:2]),               //IF stage (read out instruction)
         .bios_addrb(bios_addrb),             //WB stage (write back data)

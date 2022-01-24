@@ -1,7 +1,6 @@
 module Riscv151 #(
   parameter CPU_CLOCK_FREQ = 50_000_000,
-  //parameter RESET_PC       = 32'h4000_0000,
-  parameter RESET_PC       = 32'h1000_0000,
+  parameter RESET_PC       = 32'h4000_0000, //BIOS:32'h4000_0000;INST:32'h1000_0000;
   parameter BAUD_RATE      = 115200,
   parameter BIOS_MIF_HEX   = "bios151v3.mif"
 ) (
@@ -67,7 +66,7 @@ module Riscv151 #(
               .FWD_A_sel_EXE(FWD_A_sel_EXE),
               .FWD_B_sel_EXE(FWD_B_sel_EXE));
 
-      IFstage #(.RESET_PC(RESET_PC)) IFstage1(
+      IFstage #(.RESET_PC(RESET_PC),.MIF_HEX(BIOS_MIF_HEX)) IFstage1(
               .clk(clk),
               .rst(rst),
               .should_br(should_br),
