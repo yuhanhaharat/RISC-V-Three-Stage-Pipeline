@@ -1,10 +1,11 @@
-module IF2EXE(clk, rst, instruction_in, PC_in, A_sel_in, B_sel_in, CSR_sel_in, CSR_WE_in, ALU_sel_in, Reg_WE_in, DMEM_sel_in, LOAD_sel_in, WB_sel_in,
+module IF2EXE(clk, rst, instruction_in, PC_in, PC_rst,A_sel_in, B_sel_in, CSR_sel_in, CSR_WE_in, ALU_sel_in, Reg_WE_in, DMEM_sel_in, LOAD_sel_in, WB_sel_in,
                 instruction_out, PC_out, A_sel_out, B_sel_out, CSR_sel_out, CSR_WE_out, ALU_sel_out, Reg_WE_out, DMEM_sel_out, LOAD_sel_out, WB_sel_out);
         
           //inputs
           input clk,rst;
           input [31:0] instruction_in;
           input [31:0] PC_in;
+          input [31:0] PC_rst;
           //input:control
           input A_sel_in;
           input B_sel_in;
@@ -32,7 +33,7 @@ module IF2EXE(clk, rst, instruction_in, PC_in, A_sel_in, B_sel_in, CSR_sel_in, C
           always @ (posedge clk) begin
                 if (rst) begin
                     instruction_out <= 32'd0;
-                    PC_out <= 32'd0;
+                    PC_out <= PC_rst;
                     A_sel_out <= 1'd0;
                     B_sel_out <= 1'd0;
                     CSR_sel_out <= 1'd0;

@@ -1,4 +1,4 @@
-module EXE2MWB(clk,rst,instruction_in, ALU_result_in, IMME_result_in, PC_in, Reg_WE_in, DMEM_sel_in, LOAD_sel_in, WB_sel_in,
+module EXE2MWB(clk,rst,instruction_in, ALU_result_in, IMME_result_in, PC_in, PC_rst, Reg_WE_in, DMEM_sel_in, LOAD_sel_in, WB_sel_in,
               instruction_out, ALU_result_out, IMME_result_out, PC_out, Reg_WE_out, DMEM_sel_out, LOAD_sel_out, WB_sel_out);
       
       //inputs
@@ -7,6 +7,7 @@ module EXE2MWB(clk,rst,instruction_in, ALU_result_in, IMME_result_in, PC_in, Reg
       input [31:0] IMME_result_in;
       input [31:0] ALU_result_in;
       input [31:0] PC_in;
+      input [31:0] PC_rst;
       //input:control
       input Reg_WE_in;
       input [1:0] DMEM_sel_in;
@@ -28,7 +29,7 @@ module EXE2MWB(clk,rst,instruction_in, ALU_result_in, IMME_result_in, PC_in, Reg
               instruction_out <= 32'd0;
               IMME_result_out <= 32'd0;
               ALU_result_out <= 32'd0;
-              PC_out <= 14'd0;
+              PC_out <= PC_rst;
               Reg_WE_out <= 1'd0;
               DMEM_sel_out <= 2'd0;
               LOAD_sel_out <= 3'd0;

@@ -1,9 +1,10 @@
-module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,PC,instruction,DMEM_sel,LOAD_sel,WB_sel,WB_data_out);
+module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_sel,LOAD_sel,WB_sel,WB_data_out);
     //inputs
     input clk;
     input [31:0] IMME_in;
     input [31:0] ALU_in;
     input [31:0] DMEM_data_in;
+    input [31:0] bios_data_in;
     input [31:0] PC;
     input [31:0] instruction;
     //control signals
@@ -15,7 +16,6 @@ module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,PC,instruction,DMEM_sel,LOAD_sel,
     
     //put this as input
     wire[31:0] iomem_data_in;
-    wire[31:0] bios_data_in;
     //LOAD unit
     wire [1:0] wanted_byte;
     wire [31:0] RAW_data_in;

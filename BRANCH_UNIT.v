@@ -11,18 +11,18 @@ module BRANCH_UNIT(rst,DataA,DataB,instruction,should_br);
     wire [2:0] funct3 = instruction[14:12];
 
     always @(*) begin
-    if (opcode7 == `OPC_BRANCH) begin
-        case (funct3)
-        `FNC_BEQ: should_br = (DataA == DataB);
-        `FNC_BNE: should_br = (DataA != DataB);
-        `FNC_BLT: should_br = ($signed(DataA) < $signed(DataB));
-        `FNC_BGE: should_br = ($signed(DataA) >= $signed(DataB));
-        `FNC_BLTU: should_br = (DataA < DataB);
-        `FNC_BGEU: should_br = (DataB < DataA);
-        default: should_br = 1'b0;
-        endcase
-    end else begin
-        should_br = 1'b0;
-    end
+        if (opcode7 == `OPC_BRANCH) begin
+            case (funct3)
+            `FNC_BEQ: should_br = (DataA == DataB);
+            `FNC_BNE: should_br = (DataA != DataB);
+            `FNC_BLT: should_br = ($signed(DataA) < $signed(DataB));
+            `FNC_BGE: should_br = ($signed(DataA) >= $signed(DataB));
+            `FNC_BLTU: should_br = (DataA < DataB);
+            `FNC_BGEU: should_br = (DataB < DataA);
+            default: should_br = 1'b0;
+            endcase
+        end else begin
+            should_br = 1'b0;
+        end
     end
 endmodule
