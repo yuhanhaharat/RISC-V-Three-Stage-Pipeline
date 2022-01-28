@@ -1,4 +1,4 @@
-module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_sel,LOAD_sel,WB_sel,WB_data_out);
+module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_sel_EXE,LOAD_sel_EXE,WB_sel_EXE,WB_data_out);
     //inputs
     input clk;
     input [31:0] IMME_in;
@@ -8,9 +8,9 @@ module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_
     input [31:0] PC;
     input [31:0] instruction;
     //control signals
-    input [1:0] DMEM_sel;
-    input [2:0] LOAD_sel;
-    input [1:0] WB_sel;
+    input [1:0] DMEM_sel_EXE;
+    input [2:0] LOAD_sel_EXE;
+    input [1:0] WB_sel_EXE;
     //outputs
     output [31:0] WB_data_out;
     
@@ -24,7 +24,14 @@ module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_
     wire [31:0] PC_4;
 
     assign wanted_byte = ALU_in[1:0];
-
+    
+    wire [1:0] DMEM_sel;
+    wire [2:0] LOAD_sel;
+    wire [1:0] WB_sel;
+    assign DMEM_sel = (instruction == 0) ? 1'd0 : DMEM_sel_EXE;
+    assign LOAD_sel = (instruction == 0) ? 1'd0 : LOAD_sel_EXE;
+    assign WB_sel = (instruction == 0) ? 1'd0 : WB_sel_EXE;
+    
     mux_3input #(.LENGTH(32)) DMEM_MUX(
               .in1(iomem_data_in),
               .in2(DMEM_data_in),

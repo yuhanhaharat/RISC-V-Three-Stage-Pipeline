@@ -7,7 +7,7 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
     //PC input
     input should_br;
     //IF stage control signals
-    input [1:0] PC_sel;
+    input [2:0] PC_sel;
     input [3:0] imem_wea;
     //connection from other stages for IMEM
     input [13:0] imem_addra;
@@ -27,14 +27,21 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
     wire [31:0] instruction_raw_bios;
     wire [31:0] instruction_raw_imem;
     wire INST_sel;
+    wire [31:0] jump_addr;
     
     assign INST_sel = (PC[31:28] == 4'b0001) ? 1'b0:1'b1;   //PC[31:28] == 4'b0001, read from IMEM otherwise from BIOS
+    
+    JUMP_GEN JUMP_GEN1(
+        .instruction(instruction_raw),
+        .jump_addr(jump_addr),
+        .PC(PC_reg_out));
 
-    mux_4input #(.LENGTH(32)) PC_MUX(
+    mux_5input #(.LENGTH(32)) PC_MUX(
       .in1(RESET_PC),
       .in2(PC_reg_out),
       .in3(PC_4),
       .in4(ALU_result),
+      .in5(jump_addr),
       .sel(PC_sel),
       .out(PC));
       

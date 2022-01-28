@@ -7,7 +7,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
     input [31:0] PC;
     output reg Reg_WE;
     output reg [3:0] ALU_sel;
-    output reg [1:0] PC_sel;
+    output reg [2:0] PC_sel;
     output reg A_sel;
     output reg B_sel;
     output reg CSR_sel;
@@ -31,7 +31,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_ARI_RTYPE: begin
                     Reg_WE = 1'b1;
                     ALU_sel = {RTYPE_bit30,funct3};
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b1;
                     B_sel = 1'b1;
                     CSR_sel = 1'b0;
@@ -42,7 +42,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_ARI_ITYPE: begin
                     Reg_WE = 1'b1;
                     ALU_sel = {ITYPE_bit30,funct3};
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b1;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -53,7 +53,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_LOAD: begin
                     Reg_WE = 1'b1;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b1;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -64,7 +64,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_CSR:begin
                     Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b1;
                     B_sel = 1'b0;
                     CSR_sel = ~funct3[2];
@@ -75,7 +75,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_STORE:begin
                     Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b1;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -86,8 +86,8 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_LUI:begin
                     Reg_WE = 1'b1;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
-                    A_sel = 1'b1;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
+                    A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
                     CSR_WE = 1'b0;
@@ -97,7 +97,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_AUIPC:begin
                     Reg_WE = 1'b1;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -108,7 +108,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_JALR:begin
                     Reg_WE = 1'b1;
                     ALU_sel = 4'b0;
-                    PC_sel = 2'd3;
+                    PC_sel = 3'd3;
                     A_sel = 1'b1;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -119,7 +119,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_JAL:begin
                     Reg_WE = 1'b1;
                     ALU_sel = 4'b0;
-                    PC_sel = 2'd3;
+                    PC_sel = 3'd4;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -128,9 +128,9 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                     WB_sel = 2'd1;
                 end
                 `OPC_BRANCH:begin
-                    Reg_WE = 1'b1;
+                    Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -141,7 +141,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 `OPC_CSR:begin
                     Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = (should_br == 1'b1) ? 2'd3 : 2'd2;
+                    PC_sel = (should_br == 1'b1) ? 3'd3 : 3'd2;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = ~funct3[2];
@@ -152,7 +152,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 default:begin
                     Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = 2'b0;
+                    PC_sel = 3'b0;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -164,7 +164,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
     end else begin
             Reg_WE = 1'b0;
             ALU_sel = 4'b0;
-            PC_sel = 2'b0;
+            PC_sel = 3'b0;
             A_sel = 1'b0;
             B_sel = 1'b0;
             CSR_sel = 1'b0;

@@ -1,5 +1,5 @@
-module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB,
-                Reg_WE,ALU_sel,A_sel,B_sel,CSR_sel,CSR_WE,FWD_A_sel,FWD_B_sel,WB_data,ALU_result,
+module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB,IMME_out_MWB,
+                Reg_WE_IF,ALU_sel_IF,A_sel_IF,B_sel_IF,CSR_sel_IF,CSR_WE_IF,FWD_A_sel_IF,FWD_B_sel_IF,WB_data,ALU_result,
                 IMME_out,DMEM_data_out,should_br,mem_data,imem_wea,CSR_dout);
     
     //clk,rst signal
@@ -10,18 +10,18 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     input [31:0] instruction_MWB;
     input [31:0] DataDin;
     input [31:0] ALU_result_MWB;
+    input [31:0] IMME_out_MWB;
     //control signals
-    input Reg_WE;
-    input [3:0] ALU_sel;
-    input B_sel;
-    input A_sel;
-    input CSR_sel;
-    input CSR_WE;
-    input [1:0] FWD_A_sel;
-    input [1:0] FWD_B_sel;
+    input Reg_WE_IF;
+    input [3:0] ALU_sel_IF;
+    input B_sel_IF;
+    input A_sel_IF;
+    input CSR_sel_IF;
+    input CSR_WE_IF;
+    input [1:0] FWD_A_sel_IF;
+    input [1:0] FWD_B_sel_IF;
     //DMEM fwd
     input [31:0] WB_data;
-    
     //outputs
     output [31:0] ALU_result;
     output [31:0] IMME_out;           //Data out from IMMEout unit
@@ -33,6 +33,23 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     //CSR data
     output [31:0] CSR_dout;
     
+    wire Reg_WE;
+    wire [3:0] ALU_sel;
+    wire B_sel;
+    wire A_sel;
+    wire CSR_sel;
+    wire CSR_WE;
+    wire [1:0] FWD_A_sel;
+    wire [1:0] FWD_B_sel;
+    assign Reg_WE = (instruction_EXE == 0) ? 1'd0 : Reg_WE_IF;
+    assign ALU_sel = (instruction_EXE == 0) ? 1'd0 : ALU_sel_IF;
+    assign B_sel = (instruction_EXE == 0) ? 1'd0 : B_sel_IF;
+    assign A_sel = (instruction_EXE == 0) ? 1'd0 : A_sel_IF;
+    assign CSR_sel = (instruction_EXE == 0) ? 1'd0 : CSR_sel_IF;
+    assign CSR_WE = (instruction_EXE == 0) ? 1'd0 : CSR_WE_IF;
+    assign FWD_A_sel = (instruction_EXE == 0) ? 1'd0 : FWD_A_sel_IF;
+    assign FWD_B_sel = (instruction_EXE == 0) ? 1'd0 : FWD_B_sel_IF;
+
     wire [31:0] DataAout,DataBout;  //From Reg File
     wire [31:0] DataAin,DataBin;    //Data into ALU 
     wire [31:0] DataAout_final,DataBout_final;  //DataA and DataB after forwarding
@@ -48,16 +65,17 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     wire [3:0] iomem_wea;
     wire [13:0] dmem_addra;
     wire [3:0] dmem_wea;
+    wire [31:0] CSR_din;
 
     assign Reg_DataB = DataBout;    //same signal but name it differently for better clarity
     assign Reg_DataA = DataAout;    //same signal but name it differently for better clarity   
     assign dmem_addra = ALU_result[15:2];
-    
+
     RegFile RegFile1(
         .clk(clk),
         .Reg_WE(Reg_WE),
-        .DataA(DataAout),
-        .DataB(DataBout),
+        .DataA_new(DataAout),
+        .DataB_new(DataBout),
         .DataD(DataDin),
         .AddrA(instruction_EXE[19:15]),
         .AddrB(instruction_EXE[24:20]),
@@ -83,6 +101,7 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
         .DataA(DataAin),
         .DataB(DataBin),
         .ALUsel(ALU_sel),
+        .instruction(instruction_EXE),
         .result(ALU_result));
         
     BRANCH_UNIT BRANCH_UNIT1(
@@ -94,15 +113,16 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
 
     mux_2input #(.LENGTH(32)) CSR_MUX(
             .in1(IMME_out),
-            .in2(DataAout),
+            .in2(DataAout_final),
             .sel(CSR_sel),
-            .out(CSR_dout));
+            .out(CSR_din));
     
     CSR_RegFile CSR_RegFile1(
             .clk(clk),
             .CSR_WE(CSR_WE),
-            .din(CSR_dout),
-            .Addr(12'h51E));
+            .din(CSR_din),
+            .Addr(12'h51E),
+            .dout(CSR_dout));
     
     MEM_WRITE_CONTROL MEM_WRITE_CONTROL1(
             .instruction(instruction_EXE),
@@ -120,17 +140,19 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
             .dmem_dina(mem_data),
             .dmem_wea(dmem_wea));
             
-    mux_3input #(.LENGTH(32)) A_FWD_MUX(
+    mux_4input #(.LENGTH(32)) A_FWD_MUX(
             .in1(DataAout),
             .in2(ALU_result_MWB),
             .in3(WB_data),
+            .in4(IMME_out_MWB),
             .sel(FWD_A_sel),
             .out(DataAout_final));
             
-    mux_3input #(.LENGTH(32)) B_FWD_MUX(
+    mux_4input #(.LENGTH(32)) B_FWD_MUX(
             .in1(DataBout),
             .in2(ALU_result_MWB),
             .in3(WB_data),
+            .in4(IMME_out_MWB),
             .sel(FWD_B_sel),
             .out(DataBout_final));
             

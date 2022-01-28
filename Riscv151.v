@@ -1,6 +1,6 @@
 module Riscv151 #(
   parameter CPU_CLOCK_FREQ = 50_000_000,
-  parameter RESET_PC       = 32'h4000_0000, //BIOS:32'h4000_0000;INST:32'h1000_0000;
+  parameter RESET_PC       = 32'h1000_0000, //BIOS:32'h4000_0000;INST:32'h1000_0000;
   parameter BAUD_RATE      = 115200,
   parameter BIOS_MIF_HEX   = "bios151v3.mif"
 ) (
@@ -11,14 +11,14 @@ module Riscv151 #(
   output [31:0] csr
 );
       
-      wire [1:0] PC_sel;
+      wire [2:0] PC_sel;
       
       wire [31:0] instruction_IF;
       wire [31:0] instruction_raw_IF;
       wire [31:0] PC_IF;
       wire Reg_WE_IF;
       wire [3:0] ALU_sel_IF;
-      wire [1:0] PC_sel_IF;
+      wire [2:0] PC_sel_IF;
       wire A_sel_IF;
       wire B_sel_IF;
       wire CSR_sel_IF;
@@ -105,15 +105,16 @@ module Riscv151 #(
               .instruction_MWB(instruction_MWB),
               .DataDin(WB_data_out_MWB),
               .ALU_result_MWB(ALU_result_MWB),
-              .Reg_WE(Reg_WE_MWB),
-              .ALU_sel(ALU_sel_EXE),
+              .IMME_out_MWB(IMME_result_MWB),
+              .Reg_WE_IF(Reg_WE_MWB),
+              .ALU_sel_IF(ALU_sel_EXE),
               .WB_data(WB_data_out_MWB),
-              .A_sel(A_sel_EXE),
-              .B_sel(B_sel_EXE),
-              .CSR_sel(CSR_sel_EXE),
-              .CSR_WE(CSR_WE_EXE),
-              .FWD_A_sel(FWD_A_sel_EXE),
-              .FWD_B_sel(FWD_B_sel_EXE),
+              .A_sel_IF(A_sel_EXE),
+              .B_sel_IF(B_sel_EXE),
+              .CSR_sel_IF(CSR_sel_EXE),
+              .CSR_WE_IF(CSR_WE_EXE),
+              .FWD_A_sel_IF(FWD_A_sel_EXE),
+              .FWD_B_sel_IF(FWD_B_sel_EXE),
               .ALU_result(ALU_result_EXE),
               .IMME_out(IMME_result_EXE),
               .DMEM_data_out(DMEM_data_EXE),
@@ -130,9 +131,9 @@ module Riscv151 #(
               .ALU_in(ALU_result_MWB),
               .PC(PC_MWB),
               .instruction(instruction_MWB),
-              .DMEM_sel(DMEM_sel_MWB),
-              .LOAD_sel(LOAD_sel_MWB),
-              .WB_sel(WB_sel_MWB),
+              .DMEM_sel_EXE(DMEM_sel_MWB),
+              .LOAD_sel_EXE(LOAD_sel_MWB),
+              .WB_sel_EXE(WB_sel_MWB),
               .WB_data_out(WB_data_out_MWB));
               
       IF2EXE IF2EXE1(
