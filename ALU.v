@@ -40,7 +40,7 @@ module ALU(DataA,DataB,ALUsel,instruction,result);
            //Performs bitwise OR on registers rs1 and rs2 and place the result in rd
            `FNC_OR: result = DataA | DataB;
            //Performs bitwise AND on registers rs1 and rs2 and place the result in rd
-           `FNC_AND: result = DataA | DataB;
+           `FNC_AND: result = DataA & DataB;
            //Shift right operation
            `FNC_SRL_SRA:begin
                 if(op_bit5 == 1'b0)begin

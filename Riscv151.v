@@ -53,12 +53,13 @@ module Riscv151 #(
       wire [2:0] LOAD_sel_MWB;
       wire [1:0] WB_sel_MWB;
       wire [31:0] IMME_result_MWB;
+      wire [31:0] PC_4_result_MWB;
       wire [31:0] ALU_result_MWB;
       wire [31:0] Reg_DataB_MWB;
       wire [31:0] WB_data_out_MWB;
       
-      wire [1:0] FWD_A_sel_EXE;
-      wire [1:0] FWD_B_sel_EXE;
+      wire [2:0] FWD_A_sel_EXE;
+      wire [2:0] FWD_B_sel_EXE;
       
       hazard_unit hazard_unit1(
               .instruction_EXE(instruction_EXE),
@@ -106,6 +107,7 @@ module Riscv151 #(
               .DataDin(WB_data_out_MWB),
               .ALU_result_MWB(ALU_result_MWB),
               .IMME_out_MWB(IMME_result_MWB),
+              .PC_4_MWB(PC_4_result_MWB),
               .Reg_WE_IF(Reg_WE_MWB),
               .ALU_sel_IF(ALU_sel_EXE),
               .WB_data(WB_data_out_MWB),
@@ -130,6 +132,7 @@ module Riscv151 #(
               .IMME_in(IMME_result_MWB),
               .ALU_in(ALU_result_MWB),
               .PC(PC_MWB),
+              .PC_4_out(PC_4_result_MWB),
               .instruction(instruction_MWB),
               .DMEM_sel_EXE(DMEM_sel_MWB),
               .LOAD_sel_EXE(LOAD_sel_MWB),

@@ -1,4 +1,6 @@
-module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB,IMME_out_MWB,
+`include "Opcode.vh"
+
+module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB,IMME_out_MWB,PC_4_MWB,
                 Reg_WE_IF,ALU_sel_IF,A_sel_IF,B_sel_IF,CSR_sel_IF,CSR_WE_IF,FWD_A_sel_IF,FWD_B_sel_IF,WB_data,ALU_result,
                 IMME_out,DMEM_data_out,should_br,mem_data,imem_wea,CSR_dout);
     
@@ -11,6 +13,7 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     input [31:0] DataDin;
     input [31:0] ALU_result_MWB;
     input [31:0] IMME_out_MWB;
+    input [31:0] PC_4_MWB;
     //control signals
     input Reg_WE_IF;
     input [3:0] ALU_sel_IF;
@@ -18,8 +21,8 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     input A_sel_IF;
     input CSR_sel_IF;
     input CSR_WE_IF;
-    input [1:0] FWD_A_sel_IF;
-    input [1:0] FWD_B_sel_IF;
+    input [2:0] FWD_A_sel_IF;
+    input [2:0] FWD_B_sel_IF;
     //DMEM fwd
     input [31:0] WB_data;
     //outputs
@@ -39,16 +42,16 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     wire A_sel;
     wire CSR_sel;
     wire CSR_WE;
-    wire [1:0] FWD_A_sel;
-    wire [1:0] FWD_B_sel;
+    wire [2:0] FWD_A_sel;
+    wire [2:0] FWD_B_sel;
     assign Reg_WE = (instruction_EXE == 0) ? 1'd0 : Reg_WE_IF;
     assign ALU_sel = (instruction_EXE == 0) ? 1'd0 : ALU_sel_IF;
     assign B_sel = (instruction_EXE == 0) ? 1'd0 : B_sel_IF;
     assign A_sel = (instruction_EXE == 0) ? 1'd0 : A_sel_IF;
     assign CSR_sel = (instruction_EXE == 0) ? 1'd0 : CSR_sel_IF;
     assign CSR_WE = (instruction_EXE == 0) ? 1'd0 : CSR_WE_IF;
-    assign FWD_A_sel = (instruction_EXE == 0) ? 1'd0 : FWD_A_sel_IF;
-    assign FWD_B_sel = (instruction_EXE == 0) ? 1'd0 : FWD_B_sel_IF;
+    assign FWD_A_sel = (instruction_EXE == 0) ? 3'd0 : FWD_A_sel_IF;
+    assign FWD_B_sel = (instruction_EXE == 0) ? 3'd0 : FWD_B_sel_IF;
 
     wire [31:0] DataAout,DataBout;  //From Reg File
     wire [31:0] DataAin,DataBin;    //Data into ALU 
@@ -106,8 +109,8 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
         
     BRANCH_UNIT BRANCH_UNIT1(
         .rst(rst),
-        .DataA(DataAout),
-        .DataB(DataBout),
+        .DataA(DataAout_final),
+        .DataB(DataBout_final),
         .instruction(instruction_EXE),
         .should_br(should_br));
 
@@ -140,19 +143,21 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
             .dmem_dina(mem_data),
             .dmem_wea(dmem_wea));
             
-    mux_4input #(.LENGTH(32)) A_FWD_MUX(
+    mux_5input #(.LENGTH(32)) A_FWD_MUX(
             .in1(DataAout),
             .in2(ALU_result_MWB),
             .in3(WB_data),
             .in4(IMME_out_MWB),
+            .in5(PC_4_MWB),
             .sel(FWD_A_sel),
             .out(DataAout_final));
             
-    mux_4input #(.LENGTH(32)) B_FWD_MUX(
+    mux_5input #(.LENGTH(32)) B_FWD_MUX(
             .in1(DataBout),
             .in2(ALU_result_MWB),
             .in3(WB_data),
             .in4(IMME_out_MWB),
+            .in5(PC_4_MWB),
             .sel(FWD_B_sel),
             .out(DataBout_final));
             

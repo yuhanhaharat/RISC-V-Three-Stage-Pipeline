@@ -152,7 +152,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
                 default:begin
                     Reg_WE = 1'b0;
                     ALU_sel = 4'b0;
-                    PC_sel = 3'b0;
+                    PC_sel = 3'd0;
                     A_sel = 1'b0;
                     B_sel = 1'b0;
                     CSR_sel = 1'b0;
@@ -164,7 +164,7 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
     end else begin
             Reg_WE = 1'b0;
             ALU_sel = 4'b0;
-            PC_sel = 3'b0;
+            PC_sel = 3'd0;
             A_sel = 1'b0;
             B_sel = 1'b0;
             CSR_sel = 1'b0;

@@ -1,4 +1,4 @@
-module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_sel_EXE,LOAD_sel_EXE,WB_sel_EXE,WB_data_out);
+module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_sel_EXE,LOAD_sel_EXE,WB_sel_EXE,PC_4_out,WB_data_out);
     //inputs
     input clk;
     input [31:0] IMME_in;
@@ -12,6 +12,7 @@ module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_
     input [2:0] LOAD_sel_EXE;
     input [1:0] WB_sel_EXE;
     //outputs
+    output [31:0] PC_4_out;
     output [31:0] WB_data_out;
     
     //put this as input
@@ -20,10 +21,10 @@ module WBstage(clk,IMME_in,ALU_in,DMEM_data_in,bios_data_in,PC,instruction,DMEM_
     wire [1:0] wanted_byte;
     wire [31:0] RAW_data_in;
     wire [31:0] MEM_data;
-    //PC unit
     wire [31:0] PC_4;
-
+    
     assign wanted_byte = ALU_in[1:0];
+    assign PC_4_out = PC + 32'd4;
     
     wire [1:0] DMEM_sel;
     wire [2:0] LOAD_sel;
