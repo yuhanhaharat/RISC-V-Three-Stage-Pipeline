@@ -44,7 +44,7 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     wire CSR_WE;
     wire [2:0] FWD_A_sel;
     wire [2:0] FWD_B_sel;
-    assign Reg_WE = (instruction_EXE == 0) ? 1'd0 : Reg_WE_IF;
+    assign Reg_WE = Reg_WE_IF;
     assign ALU_sel = (instruction_EXE == 0) ? 1'd0 : ALU_sel_IF;
     assign B_sel = (instruction_EXE == 0) ? 1'd0 : B_sel_IF;
     assign A_sel = (instruction_EXE == 0) ? 1'd0 : A_sel_IF;
