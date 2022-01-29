@@ -131,7 +131,7 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
             .instruction(instruction_EXE),
             .ALU_result(ALU_result),
             .PC(PC),
-            .din_raw(Reg_DataB),
+            .din_raw(DataBout_final),
             .dmem_wea(dmem_wea),
             .imem_wea(imem_wea),
             .dout(mem_data));        

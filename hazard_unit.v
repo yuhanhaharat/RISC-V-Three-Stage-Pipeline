@@ -45,12 +45,12 @@ module hazard_unit(instruction_EXE,instruction_MWB,FWD_A_sel_EXE,FWD_B_sel_EXE);
         assign FWD_A_sel_EXE = (is_r1_hazard && (opcode5_MWB == `OPC_JALR_5)) ? 3'd4 :
                                (is_r1_hazard && (opcode5_MWB == `OPC_LUI_5))  ? 3'd3 :
                                (is_r1_hazard && (opcode5_MWB == `OPC_LOAD_5)) ? 3'd2 :
-                               (is_r1_hazard && (opcode5_MWB == `OPC_ARI_ITYPE_5 || opcode5_MWB == `OPC_ARI_RTYPE_5 || opcode5_MWB == `OPC_JAL_5 || opcode5_MWB == `OPC_AUIPC_5 || opcode5_MWB == `OPC_STORE_5)) ? 3'd1 : 3'd0;
+                               (is_r1_hazard && (opcode5_MWB == `OPC_ARI_ITYPE_5 || opcode5_MWB == `OPC_ARI_RTYPE_5 || opcode5_MWB == `OPC_JAL_5 || opcode5_MWB == `OPC_AUIPC_5)) ? 3'd1 : 3'd0;
                                
         assign FWD_B_sel_EXE = (is_r1_hazard && (opcode5_MWB == `OPC_JALR_5))?  3'd4  :
                                (is_r2_hazard && (opcode5_MWB == `OPC_LUI_5)) ?  3'd3  :
                                (is_r2_hazard && (opcode5_MWB == `OPC_LOAD_5)) ? 3'd2  :
-                               (is_r2_hazard && (opcode5_MWB == `OPC_ARI_ITYPE_5 || opcode5_MWB == `OPC_ARI_RTYPE_5 || opcode5_MWB == `OPC_JAL_5 || opcode5_MWB == `OPC_AUIPC_5 || opcode5_MWB == `OPC_STORE_5)) ? 3'd1 : 3'd0;
+                               (is_r2_hazard && (opcode5_MWB == `OPC_ARI_ITYPE_5 || opcode5_MWB == `OPC_ARI_RTYPE_5 || opcode5_MWB == `OPC_JAL_5 || opcode5_MWB == `OPC_AUIPC_5)) ? 3'd1 : 3'd0; //store inst: forward DataB
         
         
         //assign FWD_A_sel_EXE = ((AddrA_EXE == AddrD_MWB) && (opcode5 == `OPC_LOAD_5 || opcode5 == `OPC_JAL_5)) ? 2'd2 :    //ALU-ALU Hazard on DataA, no need special handle for 2cycle ALU, also handle ALU->SW
