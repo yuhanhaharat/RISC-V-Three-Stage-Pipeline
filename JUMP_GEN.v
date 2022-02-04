@@ -3,9 +3,9 @@
 
 module JUMP_GEN(instruction,jump_addr,PC);
     input [31:0] instruction;
-    output [31:0] jump_addr;
     input [31:0] PC;
-    
+    output [31:0] jump_addr;
+
     wire [6:0] opcode7 = instruction[6:0];
     
     wire [31:0] offset;

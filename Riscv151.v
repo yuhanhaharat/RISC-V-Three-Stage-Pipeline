@@ -16,16 +16,6 @@ module Riscv151 #(
       wire [31:0] instruction_IF;
       wire [31:0] instruction_raw_IF;
       wire [31:0] PC_IF;
-      wire Reg_WE_IF;
-      wire [3:0] ALU_sel_IF;
-      wire [2:0] PC_sel_IF;
-      wire A_sel_IF;
-      wire B_sel_IF;
-      wire CSR_sel_IF;
-      wire CSR_WE_IF;
-      wire [1:0] DMEM_sel_IF;
-      wire [2:0] LOAD_sel_IF;
-      wire [1:0] WB_sel_IF;
       wire [31:0] bios_dout;
       
       wire [31:0] instruction_EXE;
@@ -80,23 +70,25 @@ module Riscv151 #(
               .ALU_result(ALU_result_EXE),
               .instruction(instruction_IF),
               .instruction_raw(instruction_raw_IF),
-              .PC_reg_out(PC_IF));
-
+              .PC_reg_out(PC_IF),
+              .instruction_EXE(instruction_EXE),
+              .PC_EXE(PC_EXE));
+        
       controlunit controlunit1(
               .rst(rst),
-              .instruction(instruction_raw_IF),
+              .instruction(instruction_EXE),
               .should_br(should_br),
               .PC(PC_IF),
-              .Reg_WE(Reg_WE_IF),
-              .ALU_sel(ALU_sel_IF),
+              .Reg_WE(Reg_WE_EXE),
+              .ALU_sel(ALU_sel_EXE),
               .PC_sel(PC_sel),
-              .A_sel(A_sel_IF),
-              .B_sel(B_sel_IF),
-              .CSR_sel(CSR_sel_IF),
-              .CSR_WE(CSR_WE_IF),
-              .DMEM_sel(DMEM_sel_IF),
-              .LOAD_sel(LOAD_sel_IF),
-              .WB_sel(WB_sel_IF));
+              .A_sel(A_sel_EXE),
+              .B_sel(B_sel_EXE),
+              .CSR_sel(CSR_sel_EXE),
+              .CSR_WE(CSR_WE_EXE),
+              .DMEM_sel(DMEM_sel_EXE),
+              .LOAD_sel(LOAD_sel_EXE),
+              .WB_sel(WB_sel_EXE));
 
       EXstage EXstage1(
               .clk(clk),
@@ -145,26 +137,8 @@ module Riscv151 #(
               .instruction_in(instruction_IF), 
               .PC_in(PC_IF),
               .PC_rst(RESET_PC),
-              .A_sel_in(A_sel_IF), 
-              .B_sel_in(B_sel_IF),
-              .CSR_sel_in(CSR_sel_IF), 
-              .CSR_WE_in(CSR_WE_IF),  
-              .ALU_sel_in(ALU_sel_IF), 
-              .Reg_WE_in(Reg_WE_IF), 
-              .DMEM_sel_in(DMEM_sel_IF), 
-              .LOAD_sel_in(LOAD_sel_IF), 
-              .WB_sel_in(WB_sel_IF),
               .instruction_out(instruction_EXE), 
-              .PC_out(PC_EXE),
-              .A_sel_out(A_sel_EXE),  
-              .B_sel_out(B_sel_EXE),
-              .CSR_sel_out(CSR_sel_EXE), 
-              .CSR_WE_out(CSR_WE_EXE),  
-              .ALU_sel_out(ALU_sel_EXE), 
-              .Reg_WE_out(Reg_WE_EXE), 
-              .DMEM_sel_out(DMEM_sel_EXE), 
-              .LOAD_sel_out(LOAD_sel_EXE), 
-              .WB_sel_out(WB_sel_EXE));
+              .PC_out(PC_EXE));
       
       EXE2MWB EXE2MWB1(
               .clk(clk),

@@ -21,7 +21,7 @@ module BRANCH_UNIT(rst,DataA,DataB,instruction,should_br);
             `FNC_BGEU: should_br = (DataA >= DataB);
             default: should_br = 1'b0;
             endcase
-        end else if (opcode7 == `OPC_JALR) begin
+        end else if (opcode7 == `OPC_JALR || opcode7 == `OPC_JAL) begin
             should_br = 1'b1;
         end else begin
             should_br = 1'b0;

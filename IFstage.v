@@ -1,4 +1,7 @@
-module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb,bios_dout,ALU_result,instruction,instruction_raw,PC_reg_out);    
+`timescale 1ns / 1ps
+`include "Opcode.vh"
+
+module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb,bios_dout,ALU_result,instruction,instruction_raw,PC_reg_out,instruction_EXE,PC_EXE);    
     parameter RESET_PC = 32'h0000_0000;
     parameter MIF_HEX = "bios151v3.mif";
     
@@ -17,6 +20,9 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
     output [31:0] bios_dout;
     //JALR
     input [31:0] ALU_result;
+    //JAL
+    input [31:0] instruction_EXE;
+    input [31:0] PC_EXE;
     //output signal
     output [31:0] instruction_raw;
     output [31:0] instruction;
@@ -28,6 +34,7 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
     wire [31:0] instruction_raw_imem;
     wire INST_sel;
     wire [31:0] jump_addr;
+    wire [31:0] jump_reg_out;
     
     assign INST_sel = (PC[31:28] == 4'b0001) ? 1'b0:1'b1;   //PC[31:28] == 4'b0001, read from IMEM otherwise from BIOS
     
@@ -35,13 +42,19 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
         .instruction(instruction_raw),
         .jump_addr(jump_addr),
         .PC(PC_reg_out));
+        
+    REGISTER_R #(.N(32),.INIT(RESET_PC)) JUMP_REG(
+        .q(jump_reg_out),
+        .d(jump_addr),
+        .clk(clk),
+        .rst(rst));
 
     mux_5input #(.LENGTH(32)) PC_MUX(
       .in1(RESET_PC),
       .in2(PC_reg_out),
       .in3(PC_4),
       .in4(ALU_result),
-      .in5(jump_addr),
+      .in5(jump_reg_out),
       .sel(PC_sel),
       .out(PC));
       
@@ -51,7 +64,7 @@ module IFstage(clk,rst,should_br,PC_sel,imem_wea,imem_addra,imem_dina,bios_addrb
         .bios_addrb(bios_addrb),             //WB stage (write back data)
         .bios_douta(instruction_raw_bios),   //IF stage (read out instruction) 
         .bios_doutb(bios_dout));             //WB stage (write back data)
-         
+
     IMEM IMEM1 (
       .clk(clk),
       .imem_addra(imem_addra),
