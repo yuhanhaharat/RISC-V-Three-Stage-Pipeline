@@ -2,10 +2,18 @@
 
 module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB,IMME_out_MWB,PC_4_MWB,
                 Reg_WE_IF,ALU_sel_IF,A_sel_IF,B_sel_IF,CSR_sel_IF,CSR_WE_IF,FWD_A_sel_IF,FWD_B_sel_IF,WB_data,ALU_result,
-                IMME_out,DMEM_data_out,should_br,mem_data,imem_wea,CSR_dout);
+                IMME_out,DMEM_data_out,should_br,mem_data,imem_wea,CSR_dout,serial_in,serial_out,uart_data_load);
+    
+    parameter CLOCK_FREQ = 125_000_000;
+    parameter BAUD_RATE  = 115_200;
     
     //clk,rst signal
     input clk,rst;
+    //UART signal
+    input serial_in;
+    output serial_out;
+    //outputs from UART
+    output [31:0] uart_data_load;
     //instruction input
     input [31:0] PC;
     input [31:0] instruction_EXE;
@@ -69,6 +77,15 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
     wire [13:0] dmem_addra;
     wire [3:0] dmem_wea;
     wire [31:0] CSR_din;
+    
+    //UART receiver
+    wire data_out_ready_rx;
+    wire data_out_valid_rx;
+    wire [7:0] data_out_rx;
+    //UART transmitter
+    wire data_in_ready_tx;
+    wire data_in_valid_tx;
+    wire [7:0] data_in_tx;
 
     assign Reg_DataB = DataBout;    //same signal but name it differently for better clarity
     assign Reg_DataA = DataAout;    //same signal but name it differently for better clarity   
@@ -160,5 +177,29 @@ module EXstage(clk,rst,PC,instruction_EXE,instruction_MWB,DataDin,ALU_result_MWB
             .in5(PC_4_MWB),
             .sel(FWD_B_sel),
             .out(DataBout_final));
-            
+
+    UART_CONTROL UART_CONTROL1(
+        .instruction(instruction_EXE), 
+        .DataB(mem_data),                            //store data that already formatted by MEM control
+        .ALU_result(ALU_result),                     //address
+        .data_out_valid_rx(data_out_valid_rx), 
+        .data_out_rx(data_out_rx), 
+        .data_in_ready_tx(data_in_ready_tx), 
+        .data_load_formatted(uart_data_load),        //data to be loaded from UART
+        .data_out_ready_rx(data_out_ready_rx), 
+        .data_in_valid_tx(data_in_valid_tx), 
+        .data_store_tx(data_in_tx));                //data to be stored to UART transmitter module
+
+    uart #(.CLOCK_FREQ(CLOCK_FREQ),.BAUD_RATE(BAUD_RATE))uart1(
+        .clk(clk),
+        .reset(rst),
+        .data_in(data_in_tx),               //input
+        .data_in_valid(data_in_valid_tx),   //input
+        .data_in_ready(data_in_ready_tx),   //output
+        .data_out(data_out_rx),             //output
+        .data_out_valid(data_out_valid_rx), //output
+        .data_out_ready(data_out_ready_rx), //input
+        .serial_in(serial_in),
+        .serial_out(serial_out));
+   
 endmodule

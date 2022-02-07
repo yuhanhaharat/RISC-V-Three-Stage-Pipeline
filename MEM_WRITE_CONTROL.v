@@ -14,8 +14,10 @@ module MEM_WRITE_CONTROL(instruction,ALU_result,PC,din_raw,dmem_wea,imem_wea,dou
     wire [2:0] funct3 = instruction[14:12];
     wire [3:0] DMEM_type = ALU_result[31:28];
     
+    wire mem_type = DMEM_type == 4'b0011 || DMEM_type == 4'b0001 || DMEM_type == 4'b0010 || DMEM_type == 4'b1000;
+    
         always @(*) begin
-        if (DMEM_type == 4'b0011 || DMEM_type == 4'b0001 || DMEM_type == 4'b0010) begin
+        if (mem_type) begin
             case (opcode7)
             `OPC_STORE: begin
                 case (funct3)

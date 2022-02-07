@@ -1,10 +1,11 @@
 `include "Opcode.vh"
 
-module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_sel,CSR_sel,CSR_WE,DMEM_sel,LOAD_sel,WB_sel);
+module controlunit(rst,instruction,should_br,PC,ALU_result,Reg_WE,ALU_sel,PC_sel,A_sel,B_sel,CSR_sel,CSR_WE,DMEM_sel,LOAD_sel,WB_sel);
     input rst;
     input [31:0] instruction;
     input should_br;
     input [31:0] PC;
+    input [31:0] ALU_result;
     output reg Reg_WE;
     output reg [3:0] ALU_sel;
     output reg [2:0] PC_sel;
@@ -21,9 +22,12 @@ module controlunit(rst,instruction,should_br,PC,Reg_WE,ALU_sel,PC_sel,A_sel,B_se
     wire RTYPE_bit30 = instruction[30];
     wire ITYPE_bit30 = (instruction[14:12] == `FNC_SRL_SRA) ? instruction[30] : 1'b0;
     
-    //in1:DMEM;in2:BIOS (for LOAD instruction)
-    assign DMEM_sel = (PC[31:28] == 4'b0011 || PC[31:28] == 4'b0001) ? 2'd1 :   //DMEM
-                      (PC[31:28] == 4'b0100) ? 2'd2 : 2'd0;                     //BIOS
+    //in0:IO mapped memory; in1:DMEM; in2:BIOS (for LOAD instruction)
+    //assign DMEM_sel = (PC[31:28] == 4'b0011 || PC[31:28] == 4'b0001) ? 2'd1 :   //DMEM
+    //                  (PC[31:28] == 4'b0100) ? 2'd2 : 2'd0;                     //BIOS
+    //
+    assign DMEM_sel = (ALU_result[31:28] == 4'b0011 || ALU_result[31:28] == 4'b0001) ? 2'd1 :   //DMEM
+                      (ALU_result[31:28] == 4'b0100) ? 2'd2 : 2'd0;                             //BIOS
     
     always @(*) begin
     if(~rst)begin

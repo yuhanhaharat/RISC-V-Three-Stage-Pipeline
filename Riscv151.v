@@ -1,6 +1,6 @@
 module Riscv151 #(
   parameter CPU_CLOCK_FREQ = 50_000_000,
-  parameter RESET_PC       = 32'h1000_0000, //BIOS:32'h4000_0000;INST:32'h1000_0000;
+  parameter RESET_PC       = 32'h4000_0000, //BIOS:32'h4000_0000;INST:32'h1000_0000;
   parameter BAUD_RATE      = 115200,
   parameter BIOS_MIF_HEX   = "bios151v3.mif"
 ) (
@@ -34,6 +34,7 @@ module Riscv151 #(
       wire [31:0] IMME_result_EXE;
       wire [31:0] ALU_result_EXE;
       wire [31:0] DMEM_data_EXE;
+      wire [31:0] uart_data_load_EXE;
       wire should_br;
       
       wire [31:0] instruction_MWB;
@@ -47,6 +48,7 @@ module Riscv151 #(
       wire [31:0] ALU_result_MWB;
       wire [31:0] Reg_DataB_MWB;
       wire [31:0] WB_data_out_MWB;
+      wire [31:0] uart_data_load_MWB;
       
       wire [2:0] FWD_A_sel_EXE;
       wire [2:0] FWD_B_sel_EXE;
@@ -79,6 +81,7 @@ module Riscv151 #(
               .instruction(instruction_EXE),
               .should_br(should_br),
               .PC(PC_IF),
+              .ALU_result(ALU_result_EXE),
               .Reg_WE(Reg_WE_EXE),
               .ALU_sel(ALU_sel_EXE),
               .PC_sel(PC_sel),
@@ -90,7 +93,7 @@ module Riscv151 #(
               .LOAD_sel(LOAD_sel_EXE),
               .WB_sel(WB_sel_EXE));
 
-      EXstage EXstage1(
+      EXstage #(.CLOCK_FREQ(CPU_CLOCK_FREQ),.BAUD_RATE(BAUD_RATE)) EXstage1(
               .clk(clk),
               .rst(rst),
               .PC(PC_EXE),
@@ -115,12 +118,16 @@ module Riscv151 #(
               .should_br(should_br),
               .mem_data(imem_dina_EXE),     //pass back to imem
               .imem_wea(imem_wea_EXE),      //pass back to imem
-              .CSR_dout(csr));              //csr register
+              .CSR_dout(csr),               //csr register
+              .serial_in(FPGA_SERIAL_RX),
+              .serial_out(FPGA_SERIAL_TX),
+              .uart_data_load(uart_data_load_EXE));              
               
       WBstage WBstage1(
               .clk(clk),
               .DMEM_data_in(DMEM_data_EXE),
               .bios_data_in(bios_dout),
+              .iomem_data_in(uart_data_load_MWB),
               .IMME_in(IMME_result_MWB),
               .ALU_in(ALU_result_MWB),
               .PC(PC_MWB),
@@ -145,7 +152,8 @@ module Riscv151 #(
               .rst(rst),
               .instruction_in(instruction_EXE),
               .IMME_result_in(IMME_result_EXE), 
-              .ALU_result_in(ALU_result_EXE), 
+              .ALU_result_in(ALU_result_EXE),
+              .iomem_data_in(uart_data_load_EXE), 
               .PC_in(PC_EXE),
               .PC_rst(RESET_PC),
               .Reg_WE_in(Reg_WE_EXE), 
@@ -154,7 +162,8 @@ module Riscv151 #(
               .WB_sel_in(WB_sel_EXE),
               .instruction_out(instruction_MWB),
               .IMME_result_out(IMME_result_MWB),  
-              .ALU_result_out(ALU_result_MWB), 
+              .ALU_result_out(ALU_result_MWB),
+              .iomem_data_out(uart_data_load_MWB), 
               .PC_out(PC_MWB), 
               .Reg_WE_out(Reg_WE_MWB), 
               .DMEM_sel_out(DMEM_sel_MWB), 
